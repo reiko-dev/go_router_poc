@@ -1,11 +1,9 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart' as router;
 
 import 'package:go_router_poc/launcher_service.dart';
+import 'package:go_router_poc/models/curriculum.dart';
+import 'package:go_router_poc/models/random.dart';
 
 final isAuthenticated = ValueNotifier(true);
 final isLoading = ValueNotifier(false);
@@ -56,7 +54,7 @@ router.GoRouter createRouter() {
         name: 'pdf',
         builder: (_, state) {
           final value = state.uri.queryParameters.keys.first;
-          return PdfPage(pdf: PDF.fromJson(value));
+          return PdfPage(pdf: Curriculum.fromJson(value));
         },
       ),
     ],
@@ -130,15 +128,14 @@ class Home extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final pdf = PDF(id: '123123', list: ['Carro', 'Maçã']);
+                final cur = Fake.createFakeCurriculum();
 
                 final uri = Uri(
                   scheme: "http",
                   host: "localhost",
                   port: 58650,
                   path: 'pdf',
-                  // queryParameters: map,
-                  query: pdf.toJson(),
+                  query: cur.toJson(),
                 );
 
                 await URLLauncherService().launchURI(uri);
@@ -179,7 +176,7 @@ class Profile extends StatelessWidget {
 
 class PdfPage extends StatelessWidget {
   const PdfPage({super.key, required this.pdf});
-  final PDF? pdf;
+  final Curriculum? pdf;
 
   @override
   Widget build(BuildContext context) {
@@ -195,56 +192,4 @@ class PdfPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class PDF {
-  final String id;
-  final List<String> list;
-
-  PDF({
-    required this.id,
-    required this.list,
-  });
-
-  PDF copyWith({
-    String? id,
-    List<String>? list,
-  }) {
-    return PDF(
-      id: id ?? this.id,
-      list: list ?? this.list,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'list': list,
-    };
-  }
-
-  factory PDF.fromMap(Map<String, dynamic> map) {
-    return PDF(
-      id: map['id'] as String,
-      list: List<String>.from((map['list'] as List)),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory PDF.fromJson(String source) =>
-      PDF.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() => 'PDF(id: $id, list: $list)';
-
-  @override
-  bool operator ==(covariant PDF other) {
-    if (identical(this, other)) return true;
-
-    return other.id == id && listEquals(other.list, list);
-  }
-
-  @override
-  int get hashCode => id.hashCode ^ list.hashCode;
 }
